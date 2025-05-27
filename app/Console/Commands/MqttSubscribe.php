@@ -1,48 +1,50 @@
 <?php
 
-namespace App\Console\Command;
+namespace App\Console\Commands;
 
-use App\Services\MqttService;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
+use Illuminate\Console\Command;
+use PhpMqtt\Client\Exceptions\ProtocolNotSupportedException;
+use PhpMqtt\Client\Facades\MQTT as LaravelMqtt;
 
 class MqttSubscribe extends Command
 {
-    protected static $defaultName = 'mqtt:subscribe';
-    private $mqttService;
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = "mqtt:subscribe {topic}";
 
-    public function __construct(MqttService $mqttService)
+    protected $description = "Subscribe to an MQTT topic and listen for messages";
+
+    public function __construct()
     {
         parent::__construct();
-        $this->mqttService = $mqttService;
     }
 
-    protected function configure()
+    public function handle()
     {
-        $this->setDescription('Subscribes to MQTT topics and handles incoming messages.');
-    }
+        $topic = $this->argument('topic');
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
-        $this->mqttService->subscribe('test', function ($topic, $message) use ($output) {
-            $output->writeln("Received message on topic {$topic}: {$message}");
-        });
+        try {
+            $mqtt = LaravelMqtt::connection();
 
-        $output->writeln('Subscribed to topic. Waiting for messages...');
-        
-        // Use the $input variable to check for an exit condition
-        $exitCondition = $input->getOption('exit-after') ?? 10; // Example: Exit after 10 seconds
-        $startTime = time();
+            $mqtt->connect();
 
-        while (true) {
-            if ((time() - $startTime) >= $exitCondition) {
-                $output->writeln('Exiting after timeout.');
-                break;
+            $mqtt->subscribe($topic, function ($topic, $message) {
+                $this->info("Received message on topic {$topic}: {$message}");
+            });
+
+            $this->info("Subscribed to topic: {$topic}. Waiting for messages...");
+
+            // Keep the script running to listen for messages
+            while (true) {
+                $mqtt->loop();
             }
-            sleep(1); // Sleep to prevent busy waiting
+        } catch (ProtocolNotSupportedException $e) {
+            $this->error("Protocol not supported: " . $e->getMessage());
+        } catch (\Exception $e) {
+            $this->error("An error occurred: " . $e->getMessage());
         }
-
-        return self::SUCCESS;
     }
 }
