@@ -31,8 +31,25 @@ class MqttSubscribe extends Command
 
             $mqtt->connect();
 
-            $mqtt->subscribe($topic, function ($topic, $message) {
+            $mqtt->subscribe($topic, function ($topic, $message) use ($mqtt) {
                 $this->info("Received message on topic {$topic}: {$message}");
+                $data = json_decode($message, true);
+
+                if ($data) {
+                    $this->publish([
+                        'code' => 0,
+                        'msg' => 'success',
+                        'data' => [
+                            'SN' => $data['SN'],
+                            'operation' => $data['operation'],
+                            'resource' => $data['resource'],
+                            'value' => $data['data']['value'],
+                        ]
+                    ], 'test', 0);
+                    // Perform additional handling logic here
+                } else {
+                    $this->error("Invalid message structure.");
+                }
             });
             while (true) {
                 $mqtt->loop();
