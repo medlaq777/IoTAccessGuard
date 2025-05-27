@@ -34,10 +34,6 @@ class MqttSubscribe extends Command
             $mqtt->subscribe($topic, function ($topic, $message) {
                 $this->info("Received message on topic {$topic}: {$message}");
             });
-
-            $this->info("Subscribed to topic: {$topic}. Waiting for messages...");
-
-            // Keep the script running to listen for messages
             while (true) {
                 $mqtt->loop();
             }
