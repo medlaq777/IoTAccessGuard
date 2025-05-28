@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Exception as GlobalException;
 use Illuminate\Console\Command;
 use PhpMqtt\Client\Exceptions\ProtocolNotSupportedException;
 use PhpMqtt\Client\Facades\MQTT as LaravelMqtt;
@@ -50,7 +51,7 @@ class MqttSubscribe extends Command
                     $mqtt->publish('test', $payload, 0);
                     $this->info('Published response to topic "test"');
                     $mqtt->unsubscribe($topic);
-                } catch (\Exception $e) {
+                } catch (GlobalException $e) {
                     $this->error("Failed to publish response: " . $e->getMessage());
                 }
             });
@@ -60,7 +61,7 @@ class MqttSubscribe extends Command
             }
         } catch (ProtocolNotSupportedException $e) {
             $this->error("Protocol not supported: " . $e->getMessage());
-        } catch (\Exception $e) {
+        } catch (GlobalException $e) {
             $this->error("An error occurred: " . $e->getMessage());
         }
     }
