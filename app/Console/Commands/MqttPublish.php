@@ -8,7 +8,7 @@ use PhpMqtt\Client\Exceptions\ProtocolNotSupportedException;
 
 class MqttPublish extends Command
 {
-    protected $signature = "mqtt:publish {topic} {message}";
+    protected $signature = "mqtt:publish {topic}";
     protected $description = "Publish a message to an MQTT topic";
 
     public function handle()
@@ -16,16 +16,16 @@ class MqttPublish extends Command
         try {
             $mqtt = LaravelMqtt::connection();
             $mqtt->connect();
-            $message = [
-                'code' => 0,
-                'msg' => 'success',
-                'data' => [
-                    'topic' => $this->argument('topic'),
-                    'message' => $this->argument('message')
+            $payload = json_encode([
+                "resource" => "password",
+                "serial" => 205074,
+                "data" => [
+                    "ret" => 0,
+                    "msg"=> "ok",
                 ]
-            ];
-            $mqtt->publish('test', json_encode($message), 0);
-            $this->info("Published message to topic 'test': " . json_encode($message));
+            ]);
+            $mqtt->publish('test', $payload, 0);
+            $this->info("Published message to topic 'test': " . $payload);
             $mqtt->loop();
         } catch (ProtocolNotSupportedException $e) {
             $this->error("Protocol not supported: " . $e->getMessage());

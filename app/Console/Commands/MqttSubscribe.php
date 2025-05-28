@@ -31,8 +31,28 @@ class MqttSubscribe extends Command
 
             $mqtt->connect();
 
-            $mqtt->subscribe($topic, function ($topic, $message) {
+            $mqtt->subscribe($topic, function ($topic, $message) use ($mqtt) {
                 $this->info("Sub => {$topic} => {$message}");
+                try {
+                    $payload = json_encode([
+                        "resource" => "qrcode",
+                        "serial" => 205074,
+                        "data" => [
+                            "code" => 0,
+                            "ret" => 0,
+                            "msg" => 'success',
+                            "data" => [
+                                "userId" => 1,
+                                "type" => 23,
+                            ]
+                        ]
+                    ]);
+                    $mqtt->publish('test', $payload, 0);
+                    $this->info('Published response to topic "test"');
+                    $mqtt->unsubscribe($topic);
+                } catch (\Exception $e) {
+                    $this->error("Failed to publish response: " . $e->getMessage());
+                }
             });
 
             while (true) {
