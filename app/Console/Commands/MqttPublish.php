@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
 use PhpMqtt\Client\Facades\MQTT as LaravelMqtt;
 use PhpMqtt\Client\Exceptions\ProtocolNotSupportedException;
@@ -17,19 +18,20 @@ class MqttPublish extends Command
             $mqtt = LaravelMqtt::connection();
             $mqtt->connect();
             $payload = json_encode([
-                "resource" => "password",
+                "resource" => "qrcode",
                 "serial" => 205074,
+                "commandId"=> 1,
                 "data" => [
                     "ret" => 0,
                     "msg"=> "ok",
                 ]
             ]);
-            $mqtt->publish('test', $payload, 0);
+            $mqtt->publish('test', $payload, 2);
             $this->info("Published message to topic 'test': " . $payload);
             $mqtt->loop();
         } catch (ProtocolNotSupportedException $e) {
             $this->error("Protocol not supported: " . $e->getMessage());
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error("An error occurred: " . $e->getMessage());
         }
     }
