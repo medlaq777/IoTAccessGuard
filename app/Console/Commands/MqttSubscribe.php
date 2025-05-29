@@ -47,12 +47,13 @@ class MqttSubscribe extends Command
                     $mqtt->publish('test', $payload, 2);
                     $this->info("Published message to topic 'test': " . $payload);
                     $mqtt->unsubscribe($topic);
-                }else {
+                } else {
                     $payload = json_encode([
                         "resource" => "cardno",
                         "data" => [
                             "ret" => 0,
                             "message" => 0,
+                            "status" => 0,
                         ]
                     ]);
                     $mqtt->publish('test', $payload, 2);
