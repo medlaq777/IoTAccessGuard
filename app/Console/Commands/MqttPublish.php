@@ -18,15 +18,23 @@ class MqttPublish extends Command
             $mqtt = LaravelMqtt::connection();
             $mqtt->connect();
             $payload = json_encode([
-                "resource" => "qrcode",
-                "serial" => 205074,
-                "commandId"=> 1,
+                "commandid" => 1,
+                "operation" => "PUT",
+                "resource" => "device/doors/1/lock/status?value=closeKeepOff",
                 "data" => [
-                    "ret" => 0,
-                    "msg"=> "ok",
+                    "floor" => "0000000000000001",
+                    "eleKeyMode" => 0,
                 ]
             ]);
-            $mqtt->publish('test', $payload, 2);
+            // $payload = json_encode([
+            //     "resource" => "openDoor/result",
+            //     "serial" => 205074, // the returned serial needs to be consistent with the serial sent when the device requests it
+            //     "data" => [
+            //         "ret" => 0, // 0: success
+            //         "msg" => "ok" // result description
+            //     ]
+            // ]);
+            $mqtt->publish('test', $payload);
             $this->info("Published message to topic 'test': " . $payload);
             $mqtt->loop();
         } catch (ProtocolNotSupportedException $e) {

@@ -32,37 +32,31 @@ class MqttSubscribe extends Command
 
             $mqtt->connect();
 
-            $mqtt->subscribe($topic, function ($topic, $message) use ($mqtt) {
-                $this->info("Sub => {$topic} => {$message}");
-                try {
-                    $payload = json_encode([
-                        "resource" => "qrcode",
-                        "serial" => 205074,
-                        "data" => [
-                            "code" => 0,
-                            "ret" => 0,
-                            "msg" => 'success',
-                            "data" => [
-                                "userId" => 1,
-                                "type" => 23,
-                            ]
-                        ]
-                    ]);
-                    $mqtt->publish('test', $payload, 0);
-                    $this->info('Published response to topic "test"');
-                    $mqtt->unsubscribe($topic);
-                } catch (GlobalException $e) {
-                    $this->error("Failed to publish response: " . $e->getMessage());
-                }
-            });
-
-            while (true) {
-                $mqtt->loop();
+        $mqtt->subscribe($topic, function ($topic, $message) use ($mqtt) {
+            $this->info("Sub => {$topic} => {$message}");
+            $decodedMessage = json_decode($message, true);
+            if (isset($decodedMessage["resource"]) && $decodedMessage["resource"] === 'qrcode') {
+                $payload = json_encode([
+                    "resource" => "qrcode",
+                    "serial" => 205074,
+                    "data" => [
+                        "ret" => 0,
+                        "message" => "ok",
+                    ]
+                ]);
+                $mqtt->publish('test', $payload, 2);
+                $this->info("Published message to topic 'test': " . $payload);
+                $mqtt->unsubscribe($topic);
             }
-        } catch (ProtocolNotSupportedException $e) {
-            $this->error("Protocol not supported: " . $e->getMessage());
-        } catch (GlobalException $e) {
-            $this->error("An error occurred: " . $e->getMessage());
+        }, 0);
+
+        while (true) {
+            $mqtt->loop();
         }
+    } catch (ProtocolNotSupportedException $e) {
+        $this->error("Protocol not supported: " . $e->getMessage());
+    } catch (GlobalException $e) {
+        $this->error("An error occurred: " . $e->getMessage());
     }
+}
 }
