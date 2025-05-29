@@ -41,7 +41,7 @@ class MqttSubscribe extends Command
                         "serial" => 205074,
                         "data" => [
                             "ret" => 0,
-                            "message" => "ok",
+                            "message" => 0,
                         ]
                     ]);
                     $mqtt->publish('test', $payload, 2);
@@ -52,7 +52,7 @@ class MqttSubscribe extends Command
                         "resource" => "cardno",
                         "data" => [
                             "ret" => 0,
-                            "message" => "ok",
+                            "message" => 0,
                         ]
                     ]);
                     $mqtt->publish('test', $payload, 2);
