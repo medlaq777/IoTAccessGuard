@@ -17,25 +17,16 @@ class MqttPublish extends Command
         try {
             $mqtt = LaravelMqtt::connection();
             $mqtt->connect();
-            $payload = json_encode([
-                "commandid" => 1,
-                "operation" => "PUT",
-                "resource" => "device/doors/1/lock/status?value=closeKeepOff",
+            $datas = [
+                "resource" => "qrcode",
+                "serial" => 205074, 
                 "data" => [
-                    "floor" => "0000000000000001",
-                    "eleKeyMode" => 0,
+                    "ret" => 0, 
+                    "msg" => "ok" 
                 ]
-            ]);
-            // $payload = json_encode([
-            //     "resource" => "openDoor/result",
-            //     "serial" => 205074, // the returned serial needs to be consistent with the serial sent when the device requests it
-            //     "data" => [
-            //         "ret" => 0, // 0: success
-            //         "msg" => "ok" // result description
-            //     ]
-            // ]);
-            $mqtt->publish('test', $payload);
-            $this->info("Published message to topic 'test': " . $payload);
+            ];
+            $mqtt->publish('test', json_encode($datas), 1);
+            $this->info("Published message to topic 'test': " . json_encode($datas));
             $mqtt->loop();
         } catch (ProtocolNotSupportedException $e) {
             $this->error("Protocol not supported: " . $e->getMessage());
