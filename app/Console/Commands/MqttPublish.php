@@ -18,14 +18,14 @@ class MqttPublish extends Command
             $mqtt = LaravelMqtt::connection();
             $mqtt->connect();
             $datas = [
-                "resource" => "qrcode",
+                "resource" => "events",
                 "serial" => 205074, 
                 "data" => [
                     "ret" => 0, 
                     "msg" => "ok" 
                 ]
             ];
-            $mqtt->publish('test', json_encode($datas), 1);
+            $mqtt->publish('test', json_encode($datas));
             $this->info("Published message to topic 'test': " . json_encode($datas));
             $mqtt->loop();
         } catch (ProtocolNotSupportedException $e) {
