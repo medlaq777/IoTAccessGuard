@@ -32,39 +32,12 @@ class MqttSubscribe extends Command
 
             $mqtt->connect();
 
-            $mqtt->subscribe($topic, function ($topic, $message) use ($mqtt) {
-                $this->info("Sub => {$topic} => {$message}");
-                $decodedMessage = json_decode($message, true);
-                if (isset($decodedMessage["resource"]) && $decodedMessage["resource"] === 'qrcode') {
-                    $payload = json_encode([
-                        "resource" => "qrcode",
-                        "serial" => 205074,
-                        "data" => [
-                            "ret" => 0,
-                            "message" => 0,
-                        ]
-                    ]);
-                    $mqtt->publish('test', $payload, 2);
-                    $this->info("Published message to topic 'test': " . $payload);
-                    $mqtt->unsubscribe($topic);
-                } else {
-                    $payload = json_encode([
-                        "resource" => "cardno",
-                        "data" => [
-                            "ret" => 0,
-                            "message" => 0,
-                            "status" => 0,
-                        ]
-                    ]);
-                    $mqtt->publish('test', $payload, 2);
-                    $this->info("Published message to topic 'test': " . $payload);
-                    $mqtt->unsubscribe($topic);
-                }
+            $mqtt->subscribe($topic, function ($topic, $message) {
+                $this->info("Received message on topic '{$topic}': {$message}");
             }, 0);
 
-            while (true) {
-                $mqtt->loop();
-            }
+            $this->info("Listening for messages on topic '{$topic}'...");
+            $mqtt->loop(true); // Run the loop indefinitely
         } catch (ProtocolNotSupportedException $e) {
             $this->error("Protocol not supported: " . $e->getMessage());
         } catch (GlobalException $e) {
