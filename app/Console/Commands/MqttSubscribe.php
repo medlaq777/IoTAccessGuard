@@ -34,10 +34,10 @@ class MqttSubscribe extends Command
 
             $mqtt->subscribe($topic, function ($topic, $message) {
                 $this->info("Received message on topic '{$topic}': {$message}");
-            }, 0);
+            }); // QoS 0
 
             $this->info("Listening for messages on topic '{$topic}'...");
-            $mqtt->loop(true); // Run the loop indefinitely
+            $mqtt->loop(true);
         } catch (ProtocolNotSupportedException $e) {
             $this->error("Protocol not supported: " . $e->getMessage());
         } catch (GlobalException $e) {
