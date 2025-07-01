@@ -21,20 +21,16 @@ class MqttPublish extends Command
             $mqtt->connect();
             
             $datas = [
-                "resource" => "qrcode",
+                "resource" => "event",
                 "serial" => 205074,
                 "data" => [
                     "ret" => 0,
                     "msg" => "ok"
                 ]
             ];
-            
-            $mqtt->publish($topic, json_encode($datas), 0);
+            $mqtt->publish($topic, json_encode($datas), 1, false);
             $this->info("Published message to topic '{$topic}': " . json_encode($datas));
-            
-            $mqtt->loop();
             $mqtt->disconnect();
-            
         } catch (ProtocolNotSupportedException $e) {
             $this->error("Protocol not supported: " . $e->getMessage());
         } catch (Exception $e) {
