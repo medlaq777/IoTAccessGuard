@@ -34,7 +34,7 @@ class MqttSubscribe extends Command
 
             $mqtt->subscribe($topic, function ($topic, $message) {
                 $this->info("Received message on topic '{$topic}': {$message}");
-            }); // QoS 0
+            }, 1, false);
 
             $this->info("Listening for messages on topic '{$topic}'...");
             $mqtt->loop(true);

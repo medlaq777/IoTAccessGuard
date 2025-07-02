@@ -21,11 +21,16 @@ class MqttPublish extends Command
             $mqtt->connect();
             
             $datas = [
-                "resource" => "event",
+                "resource" => "qrcode",
                 "serial" => 205074,
                 "data" => [
                     "ret" => 0,
-                    "msg" => "ok"
+                    "msg" => "ok",
+                    "data" => [
+                        "userId" => "1",
+                        "type" => 23,
+                        "floor" => "FFFFFFFFFFFFFFFF"
+                    ]
                 ]
             ];
             $mqtt->publish($topic, json_encode($datas), 1, false);
